@@ -1,2 +1,2 @@
 # unison
-Unicon-to-JSON method data parser, in Java
+Unicon-to-JSON method data parser, in Java.
