@@ -12,7 +12,7 @@ public class UniMain {
 	public static void main(String args[]) {
 		/*
 		 * Parses Unicon classes to JSON
-		 * Will wig out if it runs into syntax errors
+		 * TODO: Handle syntax errors / non-unicon files
 		 * In JSON format, identify classes, superclasses, fields, and methods and their args
 		 * e.g. 
 		 * { "class": "A",
@@ -43,7 +43,19 @@ public class UniMain {
 		 * 
 		 * 
 		 * Unicon class syntax (things enclosed in asterisks are non-literal):
-		 * 	
+		 * 	class className : superClassName : superClassName2 ( field1, field2, field3 )
+		 * 		method methodName ( field1, field2)
+		 * 			<method stuff>
+		 * 		end
+		 * 	end
+		 * 
+		 * (There may or may not be whitespace between punctuation like , : or () )
 		 */
+		CreateFile.main(); //Program should append if file already exists
+		for(String str : args) { //Go through each file in order.
+			ReadFile.main(str);
+			//TODO: Handle scenarios where file does/doesn't have whitespace in-between punctuation
+		}
+		
 	}
 }
