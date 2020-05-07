@@ -1,22 +1,26 @@
 package unison;
 
-import java.io.File;  // Import the File class
-import java.io.FileNotFoundException;  // Import this class to handle errors
-import java.util.Scanner; // Import the Scanner class to read text files
+import java.io.File;
+import java.io.FileNotFoundException;
+//import java.io.IOException;
+import java.util.Scanner;
+//import java.nio.charset.StandardCharsets;
 
 public class ReadFile {
-  public static void main(String filename) {
+  public static String main(String filename) {
     try {
-      File myObj = new File(filename);
-      Scanner myReader = new Scanner(myObj);
+      File myFile = new File(filename);
+      Scanner myReader = new Scanner(myFile);
+      String strang = null;
       while (myReader.hasNextLine()) {
-        String data = myReader.nextLine();
-        System.out.println(data);
+        strang = strang + myReader.nextLine();
       }
       myReader.close();
+      return strang;
     } catch (FileNotFoundException e) {
       System.out.println("An error occurred in ReadFile.");
       e.printStackTrace();
     }
+    return null;
   }
 }

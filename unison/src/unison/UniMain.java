@@ -7,6 +7,9 @@
  */
 
 package unison;
+import java.io.*;
+import java.util.Arrays;
+import java.util.Scanner;
 
 public class UniMain {
 	public static void main(String args[]) {
@@ -52,10 +55,15 @@ public class UniMain {
 		 * (There may or may not be whitespace between punctuation like , : or () )
 		 */
 		CreateFile.main(); //Program should append if file already exists
-		for(String str : args) { //Go through each file in order.
-			ReadFile.main(str);
-			//TODO: Handle scenarios where file does/doesn't have whitespace in-between punctuation
+		for(int i = 0; i < args.length; i++) { //Go through each file in order.
+			String filetext = ReadFile.main(args[i]);
+			String lines[] = filetext.split("\\r?\\n");
+			for (int j = 0; j < lines.length; j++) {
+				lines[j] = lines[j].trim();
+				if(lines[j].startsWith("class")) {
+					
+				}
+			}
 		}
-		
 	}
 }
