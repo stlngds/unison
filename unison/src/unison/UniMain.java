@@ -58,11 +58,9 @@ public class UniMain {
 		for(int i = 0; i < args.length; i++) { //Go through each file in order.
 			String filetext = ReadFile.main(args[i]);
 			String lines[] = filetext.split("\\r?\\n");
-			for (int j = 0; j < lines.length; j++) {
-				lines[j] = lines[j].trim();
-				if(lines[j].startsWith("class")) {
+			//when you 
+			if(lines[j].startsWith("class")) {//
 					
-				}
 			}
 		}
 	}
