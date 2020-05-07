@@ -77,6 +77,8 @@ public class UniMain {
 					//For example, we need to parse 'class Button:Toggle(...' the same as 'class Button : Toggle (...'
 					//Thus in the former case, we treat : or ( as their own "words"
 					String currline[] = (linesal.get(j)).split("((?<=:)|(?=:)|(?<=()|(?=()|(?<=))|(?=))|(?<=,)|(?=,))");
+					//TODO: MAKE SURE THIS WORKS
+					//Is whitespace included in the words??
 					for (int x = 0; (x < currline.length) & (currline[x] != "#"); x++) { //step through each word until you hit EOL or a comment
 						//TODO: Determine if we need to handle string literals that include # (e.g. rare-ish points in code where # doesn't denote a comment)
 						//Same goes for other keywords like class, method, et al.
@@ -141,9 +143,16 @@ public class UniMain {
 						}
 						
 						else if (currline[x] == "(" ) { //could be the start of class fields, or method parameters
-							//check if we just had a class definition or a method definition
-							lastWordType = "(";
-							//remember, fields may span multiple lines
+							if (lastWordType == "methodname") {
+								
+								lastWordType = "beginmethodparams";
+							}
+							else if ((lastWordType == "classname") | (lastWordType == "superclassname")) {
+								
+								lastWordType = "beginclassfields";
+							}
+							else lastWordType = "(";
+							//remember, fields may span multiple lines, so it's important that lastWordType is preserved across line checks
 						}
 						
 						
