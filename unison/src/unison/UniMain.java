@@ -58,10 +58,10 @@ public class UniMain {
 		 */
 		CreateFile.main(); //Program should append if file already exists
 		for(int i = 0; i < args.length; i++) { //Go through each file in order.
-			String filetext = ReadFile.main(args[i]); //Read file into text
-			String lines[] = filetext.split("\\r?\\n"); //Split file text into a string array, using return delimiters
-			List<String> linesal = new ArrayList<String>(); //convert string array into arraylist
-			linesal = Arrays.asList(lines); 
+	//		String filetext = ReadFile.main(args[i]); //Read file into text
+	//		String lines[] = filetext.split("\\r?\\n\\s+"); //Split file text into a string array, using return delimiters
+	//		List<String> linesal = new ArrayList<String>(); //convert string array into arraylist
+	//		linesal = Arrays.asList(lines); 
 
 			//variable initialization
 			boolean inClass = false;
@@ -72,7 +72,29 @@ public class UniMain {
 			int methodParamCount = 0;
 			String lastWordType = "";
 			
+			ArrayList<String> linesal = new ArrayList<>();
+			try (Scanner s = new Scanner(new File(args[i])).useDelimiter("\\r?\\n")) {
+				while (s.hasNext()) {
+					linesal.add(s.next());
+				}
+			}
+			catch (FileNotFoundException e) {
+				System.out.println("File not found.");
+			}
+			
+			//debug
+			for (int q = 0; q < linesal.size(); q++) {
+				System.out.println(q + ": " + linesal.get(q));
+			}
+			
+	//		for (int q = 0; q < lines.length; q++) {
+	//			System.out.println(q + ":" + Arrays.toString(lines) + "\\n");
+	//		} 
+			
 			System.out.println("Entering loop.");
+			
+			//-------------------------------------------------------------------------------------------------------
+			
 			//*the* loop
 			for (int j = 0; j < linesal.size(); j++) { //go through each line
 				if((linesal.get(j)).startsWith("#") == false) { //ignore comment lines
@@ -81,9 +103,12 @@ public class UniMain {
 					//Thus in the former case, we treat : or ( as their own "words"
 					String currline[] = (linesal.get(j)).split("((?<=:)|(?=:)|(?<=()|(?=()|(?<=))|(?=))|(?<=,)|(?=,))");
 					//TODO: MAKE SURE THIS WORKS
-					//Separating each character for some reason and not dividing by lines
-					System.out.println("Currline: ");
-					for (int y = 0; y < currline.length; y++) System.out.println(currline[y]);
+					//Is whitespace included in the words??
+					
+					for (int q = 0; q < currline.length; q++) {
+						System.out.println(linesal.get(j));
+						System.out.println(q + ": " + Arrays.toString(currline));
+					}
 					
 					for (int x = 0; (x < currline.length) & (currline[x] != "#"); x++) { //step through each word until you hit EOL or a comment
 						//TODO: Determine if we need to handle string literals that include # (e.g. rare-ish points in code where # doesn't denote a comment)
