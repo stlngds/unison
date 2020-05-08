@@ -68,8 +68,11 @@ public class UniMain {
 			boolean inMethod = false;
 			int superclassCount = 0;
 			int methodCount = 0;
+			int classFieldCount = 0;
+			int methodParamCount = 0;
 			String lastWordType = "";
 			
+			System.out.println("Entering loop.");
 			//*the* loop
 			for (int j = 0; j < linesal.size(); j++) { //go through each line
 				if((linesal.get(j)).startsWith("#") == false) { //ignore comment lines
@@ -78,26 +81,32 @@ public class UniMain {
 					//Thus in the former case, we treat : or ( as their own "words"
 					String currline[] = (linesal.get(j)).split("((?<=:)|(?=:)|(?<=()|(?=()|(?<=))|(?=))|(?<=,)|(?=,))");
 					//TODO: MAKE SURE THIS WORKS
-					//Is whitespace included in the words??
+					//Separating each character for some reason and not dividing by lines
+					System.out.println("Currline: ");
+					for (int y = 0; y < currline.length; y++) System.out.println(currline[y]);
+					
 					for (int x = 0; (x < currline.length) & (currline[x] != "#"); x++) { //step through each word until you hit EOL or a comment
 						//TODO: Determine if we need to handle string literals that include # (e.g. rare-ish points in code where # doesn't denote a comment)
 						//Same goes for other keywords like class, method, et al.
 						//May or may not even be needed given what we're doing?
 						
+						
+						//encounter class
 						if(currline[x] == "class") {
 							WriteToFile.main("\n{ \"class\": ");
 							inClass = true;
-							//we now expect a classname to follow immediately after
 							lastWordType = "class";
 						}
 						
+						//after a class, we expect a classname
 						else if(lastWordType == "class") {
 							WriteToFile.main("\"" + currline[x] + "\"");
 							lastWordType = "classname";
 						}
 						
+						//encounter method
 						else if(currline[x] == "method") {
-							if (inMethod == true) { //source missed an 'end'
+							if (inMethod == true) {
 								System.out.println("Encountered 'method' while inMethod, expected 'end'. Ignoring...");
 							}
 							if (methodCount == 0) {
@@ -109,9 +118,16 @@ public class UniMain {
 							lastWordType = "method";
 						}
 						
+						//encounter end
 						else if(currline[x] == "end") {
 							if ((inClass == true) & (inMethod == false)) {
 								inClass = false;
+								if (methodCount != 0) {
+									WriteToFile.main("\n}");
+								}
+								methodCount = 0;
+								classFieldCount = 0;
+								WriteToFile.main("\n}");
 							}
 							else if ((inClass == true) & (inMethod == true)) {
 								inMethod = false;
@@ -122,14 +138,16 @@ public class UniMain {
 							lastWordType = "end";
 						}
 
-						
-						else if (currline[x] == ":") { //after colons, we expect a supertype name
+						//class stuff
+						//encounter colon
+						else if (currline[x] == ":") {
 							if (superclassCount == 0) {
 								WriteToFile.main(",\n\"super\": [");
 							}
 							lastWordType = ":";
 						}
 						
+						//after colons, we expect superclass names
 						else if (lastWordType == ":") {
 							WriteToFile.main("\"" + currline[x] + "\"");
 							if (currline[x+1] == ":") {
@@ -142,21 +160,75 @@ public class UniMain {
 							lastWordType = "superclassname";
 						}
 						
-						else if (currline[x] == "(" ) { //could be the start of class fields, or method parameters
+						//method stuff
+						//after methods we expect methodnames
+						else if (lastWordType == "method") {
+							if (methodCount != 0) {
+								WriteToFile.main(",\n");
+							}
+							WriteToFile.main("\"" + currline[x] + "\": ");
+							lastWordType = "methodname";
+						}
+
+						//open parenthesis could signal the beginning of method parameters, or class fields
+						//we need to check whether the previous word was a methodname or super/classname to identify what
+						//the open paren actually means
+						else if (currline[x] == "(" ) { 
 							if (lastWordType == "methodname") {
-								
 								lastWordType = "beginmethodparams";
 							}
 							else if ((lastWordType == "classname") | (lastWordType == "superclassname")) {
-								
 								lastWordType = "beginclassfields";
 							}
-							else lastWordType = "(";
-							//remember, fields may span multiple lines, so it's important that lastWordType is preserved across line checks
+							else lastWordType = ""; //irrelevant
 						}
 						
+						//after methodnames and open parens, expect zero or more methodparams
+						else if ((lastWordType == "beginmethodparams") | (lastWordType == "m,")) {
+							if (currline[x] != ")") {
+								if (methodParamCount == 0) {
+									WriteToFile.main("[");
+								}
+								
+								methodParamCount++;
+							}
+							else { //currline[x] == ")"
+								WriteToFile.main("]");
+								lastWordType = "endmethodparams";
+								methodParamCount = 0;
+							}
+						}
 						
+						//after classnames and open parens, expect zero or more classfields
+						else if ((lastWordType == "beginclassfields") | (lastWordType == "c,")) {
+							if (currline[x] != ")") {
+								if (classFieldCount == 0) {
+									WriteToFile.main("\n\"fields\": [");
+								}
+								WriteToFile.main("\"" + currline[x] + "\"");
+								classFieldCount++;
+								lastWordType = "classfield";
+							}
+							else { //currline[x] == ")" 
+								WriteToFile.main("]");
+								lastWordType = "endclassfields";
+								classFieldCount = 0;
+							}
+						}
 						
+						//after 'classname/methodparam,', expect another classname/methodparam
+						else if (currline[x] == ",") {
+							if (lastWordType == "classfield") {
+								WriteToFile.main(", ");
+								lastWordType = "c,";
+							}
+							else if (lastWordType == "methodparam") {
+								WriteToFile.main(", ");
+								lastWordType = "m,";
+							}
+						}
+						
+						//base case, do nothing
 						else {
 							lastWordType = ""; //irrelevant
 						}
@@ -165,5 +237,6 @@ public class UniMain {
 				}
 			}
 		}
+	System.out.println("Completed parse. Exiting...");
 	}
 }
