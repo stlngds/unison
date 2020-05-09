@@ -8,6 +8,7 @@
 
 package unison;
 import java.io.*;
+import java.util.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Scanner;
@@ -103,23 +104,24 @@ public class UniMain {
 					//The following splits the line into words. Certain characters are both delimiters and "words"
 					//For example, we need to parse 'class Button:Toggle(...' the same as 'class Button : Toggle (...'
 					//Thus in the former case, we treat : or ( as their own "words"
-					String currline[] = (linesal.get(j)).split("((?<=[,:\\(\\)])|(?=[,:\\(\\)]))|(\\s+)");
-
-					//TODO: Remove all whitespace. This does not work. Convert currline to arraylist instead.
-					for (int x = 0; (x < currline.length); x++) {
-						currline[x] = currline[x].replaceAll("\\s","");
-						System.out.println("Debug: " + currline[x]);
+					String currlinet[] = (linesal.get(j)).split("((?<=[,:\\(\\)])|(?=[,:\\(\\)]))|(\\s+)");
+					List <String> currline = new java.util.ArrayList<String>(Arrays.asList(currlinet));
+					
+					for (int x = 0; (x < currline.size()) & (currline.size() != 0); x++) {
+						currline.set(x, currline.get(x).replaceAll("\\s", ""));
 					}
-					System.out.println(Arrays.toString(currline));
+					currline.removeAll(Collections.singleton(null));
+					currline.removeAll(Collections.singleton(""));
+					System.out.println(currline);
 
-					if (currline.length != 0)
-					for (int x = 0; (x < currline.length); x++) { if (currline[x] != "#") {
+					if (currline.size() != 0)
+					for (int x = 0; (x < currline.size()); x++) { if (!currline.get(x).contentEquals("#")) {
 						//step through each word until you hit EOL or a comment
 						//TODO: Fix it not entering "class" (and every other if stmnt that isn't the base case).
-						System.out.println(currline[x]);
+						//System.out.println("In loop: " + currline.get(x));
 						
 						//encounter class
-						if(currline[x] == "class") {
+						if(currline.get(x).contentEquals("class")) {
 							WriteToFile.main("\n{ \"class\": ");
 							System.out.println("in class");
 							inClass = true;
@@ -127,14 +129,14 @@ public class UniMain {
 						}
 						
 						//after a class, we expect a classname
-						else if(lastWordType == "class") {
+						else if(lastWordType.contentEquals("class")) {
 							System.out.println("last: class");
-							WriteToFile.main("\"" + currline[x] + "\"");
+							WriteToFile.main("\"" + currline.get(x) + "\"");
 							lastWordType = "classname";
 						}
 						
 						//encounter method
-						else if(currline[x] == "method") {
+						else if(currline.get(x).contentEquals("method")) {
 							if (inMethod == true) {
 								System.out.println("Encountered 'method' while inMethod, expected 'end'. Ignoring...");
 							}
@@ -148,7 +150,7 @@ public class UniMain {
 						}
 						
 						//encounter end
-						else if(currline[x] == "end") {
+						else if(currline.get(x).contentEquals("end")) {
 							if ((inClass == true) & (inMethod == false)) {
 								inClass = false;
 								if (methodCount != 0) {
@@ -169,7 +171,7 @@ public class UniMain {
 
 						//class stuff
 						//encounter colon
-						else if (currline[x] == ":") {
+						else if (currline.get(x).contentEquals(":")) {
 							if (superclassCount == 0) {
 								WriteToFile.main(",\n\"super\": [");
 							}
@@ -177,9 +179,9 @@ public class UniMain {
 						}
 						
 						//after colons, we expect superclass names
-						else if (lastWordType == ":") {
-							WriteToFile.main("\"" + currline[x] + "\"");
-							if (currline[x+1] == ":") {
+						else if (lastWordType.contentEquals(":")) {
+							WriteToFile.main("\"" + currline.get(x) + "\"");
+							if (currline.get(x+1).contentEquals(":")) {
 								WriteToFile.main(", ");
 							}
 							else {
@@ -191,30 +193,30 @@ public class UniMain {
 						
 						//method stuff
 						//after methods we expect methodnames
-						else if (lastWordType == "method") {
+						else if (lastWordType.contentEquals("method")) {
 							if (methodCount != 0) {
 								WriteToFile.main(",\n");
 							}
-							WriteToFile.main("\"" + currline[x] + "\": ");
+							WriteToFile.main("\"" + currline.get(x) + "\": ");
 							lastWordType = "methodname";
 						}
 
 						//open parenthesis could signal the beginning of method parameters, or class fields
 						//we need to check whether the previous word was a methodname or super/classname to identify what
 						//the open paren actually means
-						else if (currline[x] == "(" ) { 
-							if (lastWordType == "methodname") {
+						else if (currline.get(x).contentEquals("(")) { 
+							if (lastWordType.contentEquals("methodname")) {
 								lastWordType = "beginmethodparams";
 							}
-							else if ((lastWordType == "classname") | (lastWordType == "superclassname")) {
+							else if ((lastWordType.contentEquals("classname")) | (lastWordType.contentEquals("superclassname"))) {
 								lastWordType = "beginclassfields";
 							}
 							else lastWordType = ""; //irrelevant
 						}
 						
 						//after methodnames and open parens, expect zero or more methodparams
-						else if ((lastWordType == "beginmethodparams") | (lastWordType == "m,")) {
-							if (currline[x] != ")") {
+						else if ((lastWordType.contentEquals("beginmethodparams")) | (lastWordType.contentEquals("m,"))) {
+							if (!currline.get(x).contentEquals(")")) {
 								if (methodParamCount == 0) {
 									WriteToFile.main("[");
 								}
@@ -229,12 +231,12 @@ public class UniMain {
 						}
 						
 						//after classnames and open parens, expect zero or more classfields
-						else if ((lastWordType == "beginclassfields") | (lastWordType == "c,")) {
-							if (currline[x] != ")") {
+						else if ((lastWordType.contentEquals("beginclassfields")) | (lastWordType.contentEquals("c,"))) {
+							if (!currline.get(x).contentEquals(")")) {
 								if (classFieldCount == 0) {
 									WriteToFile.main("\n\"fields\": [");
 								}
-								WriteToFile.main("\"" + currline[x] + "\"");
+								WriteToFile.main("\"" + currline.get(x) + "\"");
 								classFieldCount++;
 								lastWordType = "classfield";
 							}
@@ -246,31 +248,32 @@ public class UniMain {
 						}
 						
 						//after 'classname/methodparam,', expect another classname/methodparam
-						else if (currline[x] == ",") {
-							if (lastWordType == "classfield") {
+						else if (currline.get(x).contentEquals(",")) {
+							if (lastWordType.contentEquals("classfield")) {
 								WriteToFile.main(", ");
 								lastWordType = "c,";
 							}
-							else if (lastWordType == "methodparam") {
+							else if (lastWordType.contentEquals("methodparam")) {
 								WriteToFile.main(", ");
 								lastWordType = "m,";
 							}
 						}
 						
-						else if ((currline[x] == "") | (currline[x] == " ")) {
+						/*else if ((currline.get(x) == "") | (currline.get(x) == " ")) {
 							//change nothing
 							System.out.println("In whitespace.");
-						}
+						}*/
 							
 						//base case, move along
 						else {
 							lastWordType = ""; //irrelevant
 						}
+						
+						System.out.println("lastWordType: " + lastWordType);
 					}}
 				}
 			}
 		}
 	System.out.println("Completed parse. Exiting...");
-
 	}
 }

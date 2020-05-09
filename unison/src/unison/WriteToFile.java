@@ -9,12 +9,17 @@ public class WriteToFile {
 			FileWriter myWriter = new FileWriter("uniuml.json");
 			myWriter.write(myString);
 			System.out.println("Wrote: " + myString);
-			myWriter.flush();
-			myWriter.close();
+	//		myWriter.flush();
+	//		myWriter.close();
 		}
 		catch (IOException e) {
 			System.out.println("An error occurred in WriteToFile.");
 			e.printStackTrace();
 		}
 	}
+/*	public static void close() {
+		try {
+			myWriter.close();
+		}
+	}*/
 }
