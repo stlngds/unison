@@ -14,7 +14,7 @@ import java.util.Scanner;
 import java.util.List;
 
 public class UniMain {
-	public static void main(String args[]) {
+	public static void main(String args[]) throws IOException {
 		/*
 		 * Parses Unicon classes to JSON
 		 * TODO: Handle syntax errors / non-unicon files
@@ -83,9 +83,12 @@ public class UniMain {
 			}
 			
 			//debug
-			for (int q = 0; q < linesal.size(); q++) {
-				System.out.println(q + ": " + linesal.get(q));
-			}
+			
+			FileWriter myWriter = new FileWriter("uniuml.json");
+			myWriter.write("\n");
+			myWriter.flush();
+			
+			WriteToFile.main("test2");
 			
 	//		for (int q = 0; q < lines.length; q++) {
 	//			System.out.println(q + ":" + Arrays.toString(lines) + "\\n");
@@ -97,34 +100,36 @@ public class UniMain {
 			
 			//*the* loop
 			for (int j = 0; j < linesal.size(); j++) { //go through each line
-				if((linesal.get(j)).startsWith("#") == false) { //ignore comment lines
+				if(((linesal.get(j)).startsWith("#") == false) & (linesal.get(j) != "")) { //ignore comment lines, empty lines
 					//The following splits the line into words. Certain characters are both delimiters and "words"
 					//For example, we need to parse 'class Button:Toggle(...' the same as 'class Button : Toggle (...'
 					//Thus in the former case, we treat : or ( as their own "words"
-					String currline[] = (linesal.get(j)).split("((?<=:)|(?=:)|(?<=()|(?=()|(?<=))|(?=))|(?<=,)|(?=,))");
-					//TODO: MAKE SURE THIS WORKS
-					//Is whitespace included in the words??
-					
-					for (int q = 0; q < currline.length; q++) {
-						System.out.println(linesal.get(j));
-						System.out.println(q + ": " + Arrays.toString(currline));
+					String currline[] = (linesal.get(j)).split("((?<=[,:\\(\\)])|(?=[,:\\(\\)]))|(\\s+)");
+
+					//TODO: Remove all whitespace. This does not work.
+					for (int x = 0; (x < currline.length); x++) {
+						currline[x] = currline[x].replaceAll("\\s","");
+						System.out.println("Debug: " + currline[x]);
 					}
-					
-					for (int x = 0; (x < currline.length) & (currline[x] != "#"); x++) { //step through each word until you hit EOL or a comment
-						//TODO: Determine if we need to handle string literals that include # (e.g. rare-ish points in code where # doesn't denote a comment)
-						//Same goes for other keywords like class, method, et al.
-						//May or may not even be needed given what we're doing?
-						
+					System.out.println(Arrays.toString(currline));
+
+					if (currline.length != 0)
+					for (int x = 0; (x < currline.length); x++) { if (currline[x] != "#") {
+						//step through each word until you hit EOL or a comment
+						//TODO: Fix it not entering "class" (and every other if that isn't the base case).
+						System.out.println(currline[x]);
 						
 						//encounter class
 						if(currline[x] == "class") {
 							WriteToFile.main("\n{ \"class\": ");
+							System.out.println("in class");
 							inClass = true;
 							lastWordType = "class";
 						}
 						
 						//after a class, we expect a classname
 						else if(lastWordType == "class") {
+							System.out.println("last: class");
 							WriteToFile.main("\"" + currline[x] + "\"");
 							lastWordType = "classname";
 						}
@@ -253,15 +258,20 @@ public class UniMain {
 							}
 						}
 						
-						//base case, do nothing
+						else if ((currline[x] == "") | (currline[x] == " ")) {
+							//change nothing
+							System.out.println("In whitespace.");
+						}
+							
+						//base case, move along
 						else {
 							lastWordType = ""; //irrelevant
 						}
-						
-					}
+					}}
 				}
 			}
 		}
 	System.out.println("Completed parse. Exiting...");
+
 	}
 }

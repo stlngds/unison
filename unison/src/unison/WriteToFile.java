@@ -8,8 +8,9 @@ public class WriteToFile {
 		try {
 			FileWriter myWriter = new FileWriter("uniuml.json");
 			myWriter.write(myString);
-			myWriter.close();
 			System.out.println("Wrote: " + myString);
+			myWriter.flush();
+			myWriter.close();
 		}
 		catch (IOException e) {
 			System.out.println("An error occurred in WriteToFile.");
