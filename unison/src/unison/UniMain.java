@@ -57,6 +57,7 @@ public class UniMain {
 		 * (There may or may not be whitespace between punctuation like , : or () )
 		 */
 		CreateFile.main(); //Program should append if file already exists
+		FileWriter myWriter = new FileWriter("uniuml.json");
 		for(int i = 0; i < args.length; i++) { //Go through each file in order.
 	//		String filetext = ReadFile.main(args[i]); //Read file into text
 	//		String lines[] = filetext.split("\\r?\\n\\s+"); //Split file text into a string array, using return delimiters
@@ -81,18 +82,6 @@ public class UniMain {
 			catch (FileNotFoundException e) {
 				System.out.println("File not found.");
 			}
-			
-			//debug
-			
-			FileWriter myWriter = new FileWriter("uniuml.json");
-			myWriter.write("\n");
-			myWriter.flush();
-			
-			WriteToFile.main("test2");
-			
-	//		for (int q = 0; q < lines.length; q++) {
-	//			System.out.println(q + ":" + Arrays.toString(lines) + "\\n");
-	//		} 
 			
 			System.out.println("Entering loop.");
 			
@@ -122,7 +111,7 @@ public class UniMain {
 						
 						//encounter class
 						if(currline.get(x).contentEquals("class")) {
-							WriteToFile.main("\n{ \"class\": ");
+							myWriter.write("\n{ \"class\": ");
 							System.out.println("in class");
 							inClass = true;
 							lastWordType = "class";
@@ -131,7 +120,7 @@ public class UniMain {
 						//after a class, we expect a classname
 						else if(lastWordType.contentEquals("class")) {
 							System.out.println("last: class");
-							WriteToFile.main("\"" + currline.get(x) + "\"");
+							myWriter.write("\"" + currline.get(x) + "\"");
 							lastWordType = "classname";
 						}
 						
@@ -141,7 +130,7 @@ public class UniMain {
 								System.out.println("Encountered 'method' while inMethod, expected 'end'. Ignoring...");
 							}
 							if (methodCount == 0) {
-								WriteToFile.main("\n\"methods\": {\n");
+								myWriter.write("\n\"methods\": {\n");
 							}
 							inMethod = true;
 							methodCount++;
@@ -154,11 +143,11 @@ public class UniMain {
 							if ((inClass == true) & (inMethod == false)) {
 								inClass = false;
 								if (methodCount != 0) {
-									WriteToFile.main("\n}");
+									myWriter.write("\n}");
 								}
 								methodCount = 0;
 								classFieldCount = 0;
-								WriteToFile.main("\n}");
+								myWriter.write("\n}");
 							}
 							else if ((inClass == true) & (inMethod == true)) {
 								inMethod = false;
@@ -173,19 +162,19 @@ public class UniMain {
 						//encounter colon
 						else if (currline.get(x).contentEquals(":")) {
 							if (superclassCount == 0) {
-								WriteToFile.main(",\n\"super\": [");
+								myWriter.write(",\n\"super\": [");
 							}
 							lastWordType = ":";
 						}
 						
 						//after colons, we expect superclass names
 						else if (lastWordType.contentEquals(":")) {
-							WriteToFile.main("\"" + currline.get(x) + "\"");
+							myWriter.write("\"" + currline.get(x) + "\"");
 							if (currline.get(x+1).contentEquals(":")) {
-								WriteToFile.main(", ");
+								myWriter.write(", ");
 							}
 							else {
-								WriteToFile.main("]");
+								myWriter.write("]");
 							}
 							superclassCount++;
 							lastWordType = "superclassname";
@@ -195,9 +184,9 @@ public class UniMain {
 						//after methods we expect methodnames
 						else if (lastWordType.contentEquals("method")) {
 							if (methodCount != 0) {
-								WriteToFile.main(",\n");
+								myWriter.write(",\n");
 							}
-							WriteToFile.main("\"" + currline.get(x) + "\": ");
+							myWriter.write("\"" + currline.get(x) + "\": ");
 							lastWordType = "methodname";
 						}
 
@@ -218,13 +207,13 @@ public class UniMain {
 						else if ((lastWordType.contentEquals("beginmethodparams")) | (lastWordType.contentEquals("m,"))) {
 							if (!currline.get(x).contentEquals(")")) {
 								if (methodParamCount == 0) {
-									WriteToFile.main("[");
+									myWriter.write("[");
 								}
 								
 								methodParamCount++;
 							}
 							else { //currline[x] == ")"
-								WriteToFile.main("]");
+								myWriter.write("]");
 								lastWordType = "endmethodparams";
 								methodParamCount = 0;
 							}
@@ -234,14 +223,14 @@ public class UniMain {
 						else if ((lastWordType.contentEquals("beginclassfields")) | (lastWordType.contentEquals("c,"))) {
 							if (!currline.get(x).contentEquals(")")) {
 								if (classFieldCount == 0) {
-									WriteToFile.main("\n\"fields\": [");
+									myWriter.write("\n\"fields\": [");
 								}
-								WriteToFile.main("\"" + currline.get(x) + "\"");
+								myWriter.write("\"" + currline.get(x) + "\"");
 								classFieldCount++;
 								lastWordType = "classfield";
 							}
 							else { //currline[x] == ")" 
-								WriteToFile.main("]");
+								myWriter.write("]");
 								lastWordType = "endclassfields";
 								classFieldCount = 0;
 							}
@@ -250,11 +239,11 @@ public class UniMain {
 						//after 'classname/methodparam,', expect another classname/methodparam
 						else if (currline.get(x).contentEquals(",")) {
 							if (lastWordType.contentEquals("classfield")) {
-								WriteToFile.main(", ");
+								myWriter.write(", ");
 								lastWordType = "c,";
 							}
 							else if (lastWordType.contentEquals("methodparam")) {
-								WriteToFile.main(", ");
+								myWriter.write(", ");
 								lastWordType = "m,";
 							}
 						}
@@ -275,5 +264,6 @@ public class UniMain {
 			}
 		}
 	System.out.println("Completed parse. Exiting...");
+	myWriter.close();
 	}
 }
