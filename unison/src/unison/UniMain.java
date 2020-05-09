@@ -17,7 +17,6 @@ public class UniMain {
 	public static void main(String args[]) throws IOException {
 		/*
 		 * Parses Unicon classes to JSON
-		 * TODO: Handle syntax errors / non-unicon files
 		 * In JSON format, identify classes, superclasses, fields, and methods and their args
 		 * e.g. 
 		 * { "class": "A",
@@ -106,7 +105,7 @@ public class UniMain {
 					//Thus in the former case, we treat : or ( as their own "words"
 					String currline[] = (linesal.get(j)).split("((?<=[,:\\(\\)])|(?=[,:\\(\\)]))|(\\s+)");
 
-					//TODO: Remove all whitespace. This does not work.
+					//TODO: Remove all whitespace. This does not work. Convert currline to arraylist instead.
 					for (int x = 0; (x < currline.length); x++) {
 						currline[x] = currline[x].replaceAll("\\s","");
 						System.out.println("Debug: " + currline[x]);
@@ -116,7 +115,7 @@ public class UniMain {
 					if (currline.length != 0)
 					for (int x = 0; (x < currline.length); x++) { if (currline[x] != "#") {
 						//step through each word until you hit EOL or a comment
-						//TODO: Fix it not entering "class" (and every other if that isn't the base case).
+						//TODO: Fix it not entering "class" (and every other if stmnt that isn't the base case).
 						System.out.println(currline[x]);
 						
 						//encounter class
