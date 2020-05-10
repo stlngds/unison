@@ -1,32 +1,42 @@
 
 { "class": "Button",
 "super": ["Toggle", "Component"]
-"fields": ["is_down", "is_held", "is_checked_flag", "label", "img_up", "img_down", "img_w", "img_h", "parent_check_box_group", "parent_button_group", "repeat_delay", "no_keyboard_flag", "toggles_flag"
+"fields": ["is_down", "is_held", "is_checked_flag", "label", "img_up", "img_down", "img_w", "img_h", "parent_check_box_group", "parent_button_group", "repeat_delay", "no_keyboard_flag", "toggles_flag"]
 "methods": {
-,
-"set_parent_button_group": []"="],
-"disables": ,
-"set_no_keyboard": ]"="]"="],
-"clear_no_keyboard": ]"="]"="],
-"tick": ],
-"go_down": ]"="],
-"go_up": ]"="],
-"handle_press": []"="]"="]"="]"="]"="],
-"handle_drag": [],
-"handle_release": []"="],
-"on_action": [],
-"handle_accel": [],
-"handle_default": [],
-"handle_event": [],
-"set_imgs": []"="]"="]"="]"="],
-"set_img": []"="]"="]"="]"="],
-",": ,
-"toggle_is_checked": ],
-"set_is_checked": ],
-"clear_is_checked": ],
-"set_toggles": ]"="],
-"clear_toggles": ]"="],
-"set_label": []"="],
-"set_one": []"set_label"]"string_val""if"]"if"]"if"]"self.Component.set_one"]"attr", "val""="]
+"set_parent_button_group": ["x"],
+"set_no_keyboard": [],
+"clear_no_keyboard": [],
+"tick": [],
+"go_down": [],
+"go_up": [],
+"handle_press": ["e"],
+"handle_drag": ["e"],
+"handle_release": ["e"],
+"on_action": ["e"],
+"handle_accel": ["e"],
+"handle_default": ["e"],
+"handle_event": ["e"],
+"set_imgs": ["x", "y"],
+"set_img": ["x"],
+"toggle_is_checked": [],
+"set_is_checked": [],
+"clear_is_checked": [],
+"set_toggles": [],
+"clear_toggles": [],
+"set_label": ["x"],
+"set_one": ["attr", "val"]
+}
+}
+{ "class": "Border",
+"super": ["Panel"]
+"fields": ["internal_alignment", "title_obj", "y1", "h1"]
+"methods": {
+"set_internal_alignment": ["x"],
+"set_title": ["c"],
+"display": ["buffer_flag"],
+"get_y_reference": [],
+"get_h_reference": [],
+"compute_absolutes": [],
+"set_one": ["attr", "val"]
 }
 }

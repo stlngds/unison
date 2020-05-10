@@ -103,14 +103,18 @@ public class UniMain {
 					currline.removeAll(Collections.singleton(""));
 					System.out.println(currline);
 
-					if (currline.size() != 0)
-					for (int x = 0; (x < currline.size()); x++) { if (!currline.get(x).contentEquals("#")) {
+					if ((currline.size() != 0))
+					for (int x = 0; (x < currline.size()); x++) { if (currline.get(x).contentEquals("#")) break; else {
 						//step through each word until you hit EOL or a comment
-						//TODO: Fix it not entering "class" (and every other if stmnt that isn't the base case).
 						//System.out.println("In loop: " + currline.get(x));
 						
+						if (currline.get(x).contentEquals("#")) {
+							break;
+						}
+						
 						//encounter class
-						if(currline.get(x).contentEquals("class")) {
+						
+						else if(currline.get(x).contentEquals("class")) {
 							myWriter.write("\n{ \"class\": ");
 							System.out.println("in class");
 							inClass = true;
@@ -133,8 +137,7 @@ public class UniMain {
 								myWriter.write("\n\"methods\": {\n");
 							}
 							inMethod = true;
-							methodCount++;
-							
+							//methodCount++;
 							lastWordType = "method";
 						}
 						
@@ -160,7 +163,7 @@ public class UniMain {
 
 						//class stuff
 						//encounter colon
-						else if (currline.get(x).contentEquals(":")) {
+						else if ((currline.get(x).contentEquals(":")) & ((lastWordType.contentEquals("classname")) | lastWordType.contentEquals("superclassname"))) {
 							if (superclassCount == 0) {
 								myWriter.write(",\n\"super\": [");
 							}
@@ -186,6 +189,7 @@ public class UniMain {
 							if (methodCount != 0) {
 								myWriter.write(",\n");
 							}
+							methodCount++;
 							myWriter.write("\"" + currline.get(x) + "\": ");
 							lastWordType = "methodname";
 						}
@@ -205,34 +209,35 @@ public class UniMain {
 						
 						//after methodnames and open parens, expect zero or more methodparams
 						else if ((lastWordType.contentEquals("beginmethodparams")) | (lastWordType.contentEquals("m,"))) {
-							if (!currline.get(x).contentEquals(")")) {
-								if (methodParamCount == 0) {
-									myWriter.write("[");
-								}
-								
-								methodParamCount++;
+							if (methodParamCount == 0) {
+								myWriter.write("[");
 							}
-							else { //currline[x] == ")"
+							if (currline.get(x).contentEquals(")")) {
 								myWriter.write("]");
 								lastWordType = "endmethodparams";
 								methodParamCount = 0;
+							}
+							else { //currline[x] == ")"
+								myWriter.write("\"" + currline.get(x) + "\"");
+								methodParamCount++;
+								lastWordType = "methodparam";
 							}
 						}
 						
 						//after classnames and open parens, expect zero or more classfields
 						else if ((lastWordType.contentEquals("beginclassfields")) | (lastWordType.contentEquals("c,"))) {
-							if (!currline.get(x).contentEquals(")")) {
-								if (classFieldCount == 0) {
-									myWriter.write("\n\"fields\": [");
-								}
-								myWriter.write("\"" + currline.get(x) + "\"");
-								classFieldCount++;
-								lastWordType = "classfield";
+							if (classFieldCount == 0) {
+								myWriter.write("\n\"fields\": [");
 							}
-							else { //currline[x] == ")" 
+							if (currline.get(x).contentEquals(")")) {
 								myWriter.write("]");
 								lastWordType = "endclassfields";
 								classFieldCount = 0;
+							}
+							else { //currline[x] == ")"
+								myWriter.write("\"" + currline.get(x) + "\"");
+								classFieldCount++;
+								lastWordType = "classfield";
 							}
 						}
 						
@@ -245,6 +250,16 @@ public class UniMain {
 							else if (lastWordType.contentEquals("methodparam")) {
 								myWriter.write(", ");
 								lastWordType = "m,";
+							}
+						}
+						
+						else if (currline.get(x).contentEquals(")")) {
+							if ((lastWordType.contentEquals("classfield")) | lastWordType.contentEquals("methodparam")
+								| lastWordType.contentEquals("beginmethodparams") | lastWordType.contentEquals("beginclassfields")) {
+								myWriter.write("]");
+								lastWordType = "endparams";
+								methodParamCount = 0;
+								classFieldCount = 0;
 							}
 						}
 						
